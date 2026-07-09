@@ -1,7 +1,7 @@
 -- MAIN LOADER NARAKU HUB
 -- Jalankan script ini di executor Anda
 
-local BaseURL = "https://github.com/narakuhub/NARAKU/tree/main/UI"
+local BaseURL = "https://raw.githubusercontent.com/narakuhub/NARAKU/refs/heads/main/UI/UI.lua"
 
 -- Fungsi untuk meload file dari GitHub
 local function LoadModule(name)
