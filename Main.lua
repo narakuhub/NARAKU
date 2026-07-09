@@ -1,19 +1,31 @@
 -- MAIN LOADER NARAKU HUB
--- Jalankan script ini di executor Anda
+-- URL diperbaiki ke format RAW agar executor bisa membaca file.lua
 
 local BaseURL = "https://raw.githubusercontent.com/narakuhub/NARAKU/refs/heads/main/UI/UI.lua"
 
 -- Fungsi untuk meload file dari GitHub
 local function LoadModule(name)
+    local url = BaseURL .. name .. ".lua"
     local success, content = pcall(function()
-        return game:HttpGet(BaseURL .. name .. ".lua")
+        return game:HttpGet(url)
     end)
     
     if success and content then
-        local module = loadstring(content)()
-        return module
+        -- Cek apakah konten yang didapat adalah error 404 (bukan kode lua)
+        if content:find("404: Not Found") or content:find("<!DOCTYPE html>") then
+            warn("NARAKU: File tidak ditemukan atau link salah: " .. url)
+            return nil
+        end
+        
+        local func, err = loadstring(content)
+        if func then
+            return func()
+        else
+            warn("NARAKU: Gagal mengompilasi modul " .. name .. ": " .. tostring(err))
+            return nil
+        end
     else
-        warn("NARAKU Gagal meload modul: " .. name)
+        warn("NARAKU: Gagal mengakses URL: " .. url)
         return nil
     end
 end
@@ -21,18 +33,11 @@ end
 -- Load semua modul
 local UI_Elements = LoadModule("UI")
 local MainPanel = LoadModule("Mainpanel")
--- local Toggle = LoadModule("Toggle")
--- local Button = LoadModule("Button")
 
 -- Inisialisasi Sistem
 if UI_Elements and MainPanel then
     MainPanel.Init(UI_Elements)
-    
-    -- Jika sudah ada modul Toggle/Button, tambahkan di bawah:
-    -- if Toggle then Toggle.Init(UI_Elements) end
-    -- if Button then Button.Init(UI_Elements) end
-    
     print("NARAKU HUB: System Loaded Successfully!")
 else
-    warn("NARAKU HUB: Terjadi kesalahan saat inisialisasi.")
+    warn("NARAKU HUB: Terjadi kesalahan saat inisialisasi modul.")
 end
